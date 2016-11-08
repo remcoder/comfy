@@ -1,5 +1,6 @@
 package nl.remcoder.comfy
 
+import android.content.Intent
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
@@ -17,10 +18,11 @@ import android.view.View
 import android.view.ViewGroup
 
 import android.widget.TextView
+import kotlinx.android.synthetic.main.activity_edit_room.*
 import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import nl.remcoder.comfy.Models.Room
-
+import org.jetbrains.anko.startActivityForResult
 
 val rooms = mutableListOf(
         Room("Woonkamer", 20.0, 42.0, "0.0.0.0"),
@@ -63,37 +65,55 @@ class MainActivity : AppCompatActivity() {
         val fab = findViewById(R.id.fab) as FloatingActionButton
         fab.setOnClickListener { view ->
             println("click")
-            var newRoom = Room("New Room", 0.0, 0.0, "0.0.0.0")
 
-            Snackbar.make(view, "'${newRoom.name}' added", Snackbar.LENGTH_LONG).setAction("Action", null).show()
-
-            rooms.add(newRoom)
-
-            mSectionsPagerAdapter?.notifyDataSetChanged()
-
-//            mViewPager!!.setCurrentItem(rooms.count()-1, true)
+            startActivityForResult<EditRoomActivity>(0)
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+        print("requestcode " + requestCode)
+        print("resultCode" + resultCode)
+        // Check which request we're responding to
+        if (requestCode == 0) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                val roomName = data.getStringExtra("room-name")
+                val ipAddress = data.getStringExtra("ip-address")
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        val id = item.itemId
-        print("selected: " + id)
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true
+                var newRoom = Room(roomName, 0.0, 0.0, ipAddress)
+
+                Snackbar.make(mViewPager!!, "'${newRoom.name}' added", Snackbar.LENGTH_LONG)
+                        .show()
+
+                rooms.add(newRoom)
+
+                mSectionsPagerAdapter?.notifyDataSetChanged()
+
+                mViewPager!!.setCurrentItem(rooms.count()-1, true)
+
+            }
         }
-
-        return super.onOptionsItemSelected(item)
     }
+
+//    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        menuInflater.inflate(R.menu.menu_main, menu)
+//        return true
+//    }
+//
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        // Handle action bar item clicks here. The action bar will
+//        // automatically handle clicks on the Home/Up button, so long
+//        // as you specify a parent activity in AndroidManifest.xml.
+//        val id = item.itemId
+//        print("selected: " + id)
+//        //noinspection SimplifiableIfStatement
+//        if (id == R.id.action_settings) {
+//            return true
+//        }
+//
+//        return super.onOptionsItemSelected(item)
+//    }
 
     /**
      * A placeholder fragment containing a simple view.
