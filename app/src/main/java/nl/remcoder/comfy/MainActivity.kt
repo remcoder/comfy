@@ -63,11 +63,15 @@ class MainActivity : AppCompatActivity() {
         val fab = findViewById(R.id.fab) as FloatingActionButton
         fab.setOnClickListener { view ->
             println("click")
-            Snackbar.make(view, "'Keuken' added", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+            var newRoom = Room("New Room", 0.0, 0.0, "0.0.0.0")
 
-            rooms.add(Room("Keuken", 20.0, 40.0, "0.0.0.0"))
+            Snackbar.make(view, "'${newRoom.name}' added", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+
+            rooms.add(newRoom)
 
             mSectionsPagerAdapter?.notifyDataSetChanged()
+
+//            mViewPager!!.setCurrentItem(rooms.count()-1, true)
         }
     }
 
