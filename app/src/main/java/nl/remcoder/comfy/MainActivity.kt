@@ -1,5 +1,6 @@
 package nl.remcoder.comfy
 
+import android.content.Context
 import android.content.Intent
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.Snackbar
@@ -23,12 +24,16 @@ import kotlinx.android.synthetic.main.fragment_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import nl.remcoder.comfy.Models.Room
 import org.jetbrains.anko.startActivityForResult
+import java.io.File
+import android.content.Context.MODE_PRIVATE
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.lang.reflect.Type
 
-val rooms = mutableListOf(
-        Room("Woonkamer", 20.0, 42.0, "0.0.0.0"),
-        Room("Kinderkamer", 21.5, 38.0, "0.0.0.0"),
-        Room("Badkamer", 22.5, 65.8, "0.0.0.0")
-)
+
+val rooms = mutableListOf<Room>()
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,6 +51,7 @@ class MainActivity : AppCompatActivity() {
      * The [ViewPager] that will host the section contents.
      */
     private var mViewPager: ViewPager? = null
+    private val filename = "rooms"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +59,31 @@ class MainActivity : AppCompatActivity() {
 
         val toolbar = findViewById(R.id.toolbar) as Toolbar
         setSupportActionBar(toolbar)
+
+        println("reading file: " + filename)
+        var inputStream : FileInputStream
+        var json = ""
+        try {
+            inputStream = openFileInput(filename)
+            val bytes = inputStream.readBytes()
+            json = String(bytes)
+            inputStream.close()
+            println(json)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        val gson = Gson()
+        val listType = object : TypeToken<MutableList<Room>>() {}.type
+        val obj = gson.fromJson<MutableList<Room>>(json, listType)
+
+        rooms.clear()
+
+        for(r in obj) {
+            rooms.add(r)
+        }
+
+
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
@@ -68,11 +99,13 @@ class MainActivity : AppCompatActivity() {
 
             startActivityForResult<EditRoomActivity>(0)
         }
+
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-        print("requestcode " + requestCode)
-        print("resultCode" + resultCode)
+        println("requestcode " + requestCode)
+        println("resultCode" + resultCode)
         // Check which request we're responding to
         if (requestCode == 0) {
             // Make sure the request was successful
@@ -86,6 +119,21 @@ class MainActivity : AppCompatActivity() {
                         .show()
 
                 rooms.add(newRoom)
+
+                // store rooms
+                val gson = Gson()
+                val json = gson.toJson( rooms )
+                val outputStream: FileOutputStream
+
+                println("saving file: " + filename)
+
+                try {
+                    outputStream = openFileOutput(filename, Context.MODE_PRIVATE)
+                    outputStream.write(json.toByteArray())
+                    outputStream.close()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
 
                 mSectionsPagerAdapter?.notifyDataSetChanged()
 

@@ -34,7 +34,7 @@ class EditRoomActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         val id = item.itemId
-        print("selected: " + id)
+        println("selected: " + id)
         //noinspection SimplifiableIfStatement
         if (id == MENU_CREATE_ROOM) {
             val roomName = (findViewById(R.id.roomName) as TextView).text.toString()
